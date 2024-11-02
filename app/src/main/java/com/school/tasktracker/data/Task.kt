@@ -1,4 +1,4 @@
-package com.school.tasktracker
+package com.school.tasktracker.data
 
 import java.util.Date
 import java.util.UUID
