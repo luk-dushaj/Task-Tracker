@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun TextRow(modifier: Modifier = Modifier, title: String) {
+fun TextRow(title: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier,
         text = title,

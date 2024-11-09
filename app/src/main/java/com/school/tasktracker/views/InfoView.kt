@@ -6,13 +6,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.school.tasktracker.data.InfoItem
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.components.*
+import com.school.tasktracker.ui.theme.TaskTrackerTheme
 
 @Composable
-fun InfoView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+fun InfoView(modifier: Modifier = Modifier) {
 
     var infoItems = listOf(
         InfoItem(
@@ -78,5 +80,15 @@ fun InfoDetail(modifier: Modifier = Modifier, description: String) {
             text = description,
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+@Preview
+@Composable
+private fun InfoPreview() {
+    TaskTrackerTheme {
+        Surface {
+            InfoView()
+        }
     }
 }

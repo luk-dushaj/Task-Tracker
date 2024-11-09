@@ -11,6 +11,6 @@ data class Task(
     var title: String,
     var description: String,
     var isPriority: Boolean,
-    var deadline: Date,
+    var date: Date,
     var isCompleted: Boolean = false
 )

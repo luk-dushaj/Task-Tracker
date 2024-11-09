@@ -49,6 +49,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavController
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
+import com.school.tasktracker.views.AddTaskView
 import com.school.tasktracker.views.InfoView
 import com.school.tasktracker.views.SettingsView
 import com.school.tasktracker.views.TodoView
@@ -134,7 +135,7 @@ fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navContro
                         1 -> navController.navigate(Routes.settings)
                         2 -> navController.navigate(Routes.info)
                         // Info for now because haven't gotten to "AddTaskView" yet
-                        3 -> navController.navigate(Routes.todo)
+                        3 -> navController.navigate(Routes.addView)
                         // No else, should not error
                     }
                 }
@@ -163,16 +164,12 @@ fun MainView(modifier: Modifier = Modifier) {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            Column (
-                modifier = modifier
-                    .padding(5.dp)
-            ) {
-                // View content
-                NavHost(navController = navController, startDestination = Routes.todo) {
-                    composable(Routes.todo) { TodoView(viewModel = viewModel) }
-                    composable(Routes.settings) { SettingsView(viewModel = viewModel) }
-                    composable(Routes.info) { InfoView(viewModel = viewModel) }
-                }
+            // View content
+            NavHost(navController = navController, startDestination = Routes.todo) {
+                composable(Routes.todo) { TodoView(viewModel = viewModel) }
+                composable(Routes.settings) { SettingsView(viewModel = viewModel) }
+                composable(Routes.info) { InfoView() }
+                composable(Routes.addView) { AddTaskView(viewModel = viewModel) }
             }
         }
     }

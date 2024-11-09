@@ -11,6 +11,9 @@ import androidx.lifecycle.ViewModel
 // There will be a lot of example data for now because I am focusing on the UI currently
 class MainViewModel: ViewModel() {
 
+    private var _tasks = MutableLiveData<List<Task>>(emptyList())
+    var tasks: LiveData<List<Task>> = _tasks
+
     private var _infoValue = MutableLiveData(List(4) { false })
     val infoValue: LiveData<List<Boolean>> = _infoValue
 
