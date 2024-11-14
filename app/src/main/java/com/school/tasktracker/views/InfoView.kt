@@ -86,18 +86,16 @@ fun InfoType(
     title: String,
     description: String,
     index: Int,
-    viewModel: MainViewModel
+    viewModel: MainViewModel = MainViewModel()
 ) {
-    // Observe the dropdown state directly from the ViewModel
-    val isClicked by viewModel.infoValue.observeAsState(initial = List(6) { false })
+    // Implement viewModel logic here to save state
+    // For now I will still use MutableState
+    val bool = viewModel.getValue(index)
+    val onClick = remember { mutableStateOf(bool) }
 
-    ArrowRow(name = title, onClick = {
-        viewModel.toggleValue(index) // Update ViewModel state on click
-    })
+    ArrowRow(name = title, onClick = onClick)
 
-    // Display dropdown content if the state for the current index is true
-    if (isClicked[index]) {
-        Text("Dropdown is expanded")
+    if (onClick.value) {
         Line()
         InfoDetail(description = description)
     }

@@ -15,10 +15,10 @@ import com.school.tasktracker.components.TextRow
 
 @Composable
 fun SettingsView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+    // Will implement theme functionality later, this is just a placeholder
     val theme = viewModel.theme.observeAsState().value ?: "default"
     // To toggle theme dropdown menu
-    var isClick = remember { mutableStateOf(false) }
-    var position by remember { mutableStateOf(Offset.Zero) }
+    val onClick = remember { mutableStateOf(false) }
     Column (
         modifier = modifier.padding(5.dp)
     ) {
@@ -38,26 +38,32 @@ fun SettingsView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
         )
         ArrowRow(
             name = "Theme",
-            onClick = isClick
+            onClick = onClick
         )
 
         DropdownMenu(
-            expanded = isClick.value,
-            onDismissRequest = { isClick.value = false },
+            expanded = onClick.value,
+            onDismissRequest = { onClick.value = false },
             // Aligning it under the arrow icon
-            offset = DpOffset(x = 275.dp, y = 0.dp)
+            offset = DpOffset(x = 275.dp, y = 310.dp)
         ) {
             DropdownMenuItem(
                 text = { Text("Device Default") },
-                onClick = { viewModel.updateTheme("default") }
+                onClick = {
+                    viewModel.updateTheme("default")
+                }
             )
             DropdownMenuItem(
                 text = { Text("Dark") },
-                onClick = { viewModel.updateTheme("dark") }
+                onClick = {
+                    viewModel.updateTheme("dark")
+                }
             )
             DropdownMenuItem(
                 text = { Text("Light") },
-                onClick = { viewModel.updateTheme("light") }
+                onClick = {
+                    viewModel.updateTheme("light")
+                }
             )
         }
     }
