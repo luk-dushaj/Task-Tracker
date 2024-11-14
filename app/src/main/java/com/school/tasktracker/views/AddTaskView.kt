@@ -1,11 +1,14 @@
 package com.school.tasktracker.views
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -27,6 +30,7 @@ import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import java.util.Date
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.verticalScroll
@@ -40,61 +44,133 @@ import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
+import java.util.*
+import java.text.SimpleDateFormat
+
+// Logic will be implemented later
 
 @SuppressLint("DefaultLocale")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
-    var isManualClicked = remember { mutableStateOf(false) }
-    var isDateClicked = remember { mutableStateOf(false) }
-    fun onlyActivateOne() {
-        if (isManualClicked.value) {
-            isManualClicked.value = !isManualClicked.value
-        }
-    }
-
-    var title by remember { mutableStateOf("") }
+    var title = remember { mutableStateOf("") }
     var date: Date
     var description = remember { mutableStateOf("") }
     var isPriority = remember { mutableStateOf(false) }
     Column(
-        modifier = modifier.padding(5.dp),
+        modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TextRow("Task Title")
-            PriorityRow(bool = isPriority)
-        }
-        TextField(
-            modifier = modifier.fillMaxWidth(),
-            value = title,
-            onValueChange = { newTitle -> title = newTitle }
-        )
+        TaskTitle(title = title, isPriority = isPriority)
         TextRow("Date and time to complete by")
-        /*Row {
-            TextField(
-                // Will implement time and date
-            )
-        }*/
+        DateTimeInput()
         TextRow("Task Description")
-        BigScrollableTextField(text = description)
+        ScrollableTextField(text = description)
+        SaveRow()
     }
 }
 
 @Composable
+fun DateTimeInput() {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    // Set date and time format with AM/PM
+    val dateFormat = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
+
+    val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
+    // Mutable state for the date and time input, initialized with current date and time
+    var date by remember { mutableStateOf(dateFormat.format(calendar.time)) }
+    var time by remember { mutableStateOf(timeFormat.format(calendar.time)) }
+
+    // Date picker dialog
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, month, dayOfMoth, year ->
+            calendar.set(month, dayOfMoth, year)
+            date = dateFormat.format(calendar.time)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    // Time picker dialog with 12-hour format (AM/PM)
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hourOfDay, minute ->
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+            calendar.set(Calendar.MINUTE, minute)
+            time = timeFormat.format(calendar.time)
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        false // false for 12-hour format with AM/PM
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+
+        Column {
+            Text(
+                modifier = Modifier
+                    .offset(x = 12.dp),
+                text = date
+            )
+            Button(onClick = { datePickerDialog.show() }) {
+                Text("Select Date")
+            }
+        }
+
+        Column {
+            Text(
+                modifier = Modifier
+                    .offset(x = 24.dp),
+                text = time
+            )
+            Button(onClick = { timePickerDialog.show() }) {
+                Text("Select Time")
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskTitle(
+    title: MutableState<String>,
+    isPriority: MutableState<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TextRow("Task Title")
+        PriorityRow(bool = isPriority)
+    }
+    TextField(
+        modifier = modifier.fillMaxWidth(),
+        value = title.value,
+        onValueChange = { newTitle -> title.value = newTitle }
+    )
+}
+
+@Composable
 fun PriorityRow(modifier: Modifier = Modifier, bool: MutableState<Boolean>) {
-    Row (
+    Row(
         modifier = modifier
             .clickable {
                 bool.value = !bool.value
             }
     ) {
         TextRow("Priority")
+        Spacer(modifier = modifier.width(4.dp))
         if (bool.value) {
             HalfStarIcon(filled = true)
         } else {
@@ -104,8 +180,7 @@ fun PriorityRow(modifier: Modifier = Modifier, bool: MutableState<Boolean>) {
 }
 
 @Composable
-fun BigScrollableTextField(text: MutableState<String>) {
-    // Scroll state for the text field to enable vertical scrolling
+fun ScrollableTextField(text: MutableState<String>) {
     val scrollState = rememberScrollState()
 
     TextField(
@@ -138,7 +213,7 @@ fun HalfStarIcon(filled: Boolean) {
     Box(
         modifier = Modifier
             .size(iconSize)
-            .offset( y = (-3).dp)
+            .offset(y = (-3).dp)
     ) {
         // Draw the outline (empty star) with the specified outline color
         Icon(
@@ -168,6 +243,23 @@ fun HalfStarIcon(filled: Boolean) {
     }
 }
 
+@Composable
+fun SaveRow(modifier: Modifier = Modifier) {
+    Spacer(modifier = modifier.height(5.dp))
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Button(onClick = {}) {
+            Text("Cancel")
+        }
+        Spacer(modifier = modifier.width(20.dp))
+        Button(onClick = {}) {
+            Text("Save")
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

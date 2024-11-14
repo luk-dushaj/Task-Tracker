@@ -14,7 +14,24 @@ class MainViewModel: ViewModel() {
     private var _tasks = MutableLiveData<List<Task>>(emptyList())
     var tasks: LiveData<List<Task>> = _tasks
 
-    private var _infoValue = MutableLiveData(List(4) { false })
+    fun addTask(task: Task) {
+        // Get the current list or an empty list if null, then add the new task
+        val updatedList = _tasks.value.orEmpty().toMutableList().apply {
+            add(task)
+        }
+        // Post the updated list to LiveData
+        _tasks.value = updatedList
+    }
+
+    fun removeTask(task: Task) {
+        // Get the current list, filter out the specified task, and post the new list
+        val updatedList = _tasks.value.orEmpty().toMutableList().apply {
+            remove(task)
+        }
+        _tasks.value = updatedList
+    }
+
+    private var _infoValue = MutableLiveData(List(6) { false })
     val infoValue: LiveData<List<Boolean>> = _infoValue
 
     private fun updateIndex(index: Int, newValue: Boolean) {

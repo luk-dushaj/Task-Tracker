@@ -69,6 +69,36 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun MainView(modifier: Modifier = Modifier) {
+    // Need elvis operator here incase if value is null
+
+    val viewModel = MainViewModel()
+    val navController = rememberNavController()
+    Scaffold(
+        topBar = {
+            TopBar(modifier = modifier, viewModel = viewModel)
+        },
+        bottomBar = {
+            BottomBar(viewModel = viewModel, navController = navController)
+        }
+    ) { innerPadding ->
+        // Main content area, using innerPadding to avoid overlap with the bottom bar
+        Surface(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            // View content
+            NavHost(navController = navController, startDestination = Routes.todo) {
+                composable(Routes.todo) { TodoView(viewModel = viewModel) }
+                composable(Routes.settings) { SettingsView(viewModel = viewModel) }
+                composable(Routes.info) { InfoView() }
+                composable(Routes.addView) { AddTaskView(viewModel = viewModel) }
+            }
+        }
+    }
+}
 
 @Composable
 fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel) {
@@ -105,10 +135,8 @@ fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel) {
 
 @Composable
 fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
-    // State for the selected item in the navigation bar
     var selectedItemIndex by remember { mutableIntStateOf(0) }
 
-    // Define the items and their corresponding icons
     val items = listOf("Home", "Settings", "Info", "Add")
     val selectedIcons = listOf(Filled.Home, Filled.Settings, Filled.Info, Filled.AddCircle)
     val unselectedIcons = listOf(Icons.Outlined.Home, Icons.Outlined.Settings, Icons.Outlined.Info, Icons.Outlined.Add)
@@ -128,49 +156,15 @@ fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navContro
                 selected = selectedItemIndex == index,
                 onClick = {
                     selectedItemIndex = index
-                    // I still have to update globally to remove edit button etc
                     viewModel.updateViewNumber(selectedItemIndex)
                     when (viewModel.viewNumber.value) {
                         0 -> navController.navigate(Routes.todo)
                         1 -> navController.navigate(Routes.settings)
                         2 -> navController.navigate(Routes.info)
-                        // Info for now because haven't gotten to "AddTaskView" yet
                         3 -> navController.navigate(Routes.addView)
-                        // No else, should not error
                     }
                 }
             )
-        }
-    }
-}
-
-@Composable
-fun MainView(modifier: Modifier = Modifier) {
-    // Need elvis operator here incase if value is null
-
-    val viewModel = MainViewModel()
-    val navController = rememberNavController()
-    Scaffold(
-        topBar = {
-            TopBar(modifier = modifier, viewModel = viewModel)
-        },
-        bottomBar = {
-            BottomBar(viewModel = viewModel, navController = navController)
-        }
-    ) { innerPadding ->
-        // Main content area, using innerPadding to avoid overlap with the bottom bar
-        Surface(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            // View content
-            NavHost(navController = navController, startDestination = Routes.todo) {
-                composable(Routes.todo) { TodoView(viewModel = viewModel) }
-                composable(Routes.settings) { SettingsView(viewModel = viewModel) }
-                composable(Routes.info) { InfoView() }
-                composable(Routes.addView) { AddTaskView(viewModel = viewModel) }
-            }
         }
     }
 }
