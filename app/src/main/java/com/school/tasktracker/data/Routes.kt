@@ -1,7 +1,7 @@
 package com.school.tasktracker.data
 
 object Routes {
-    var todo = "todo"
+    var home = "home"
     var settings = "settings"
     var info = "info"
     var addView = "addView"

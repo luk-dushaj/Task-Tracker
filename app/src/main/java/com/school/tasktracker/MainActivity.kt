@@ -50,9 +50,10 @@ import androidx.navigation.NavController
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
 import com.school.tasktracker.views.AddTaskView
+import com.school.tasktracker.views.HomeView
 import com.school.tasktracker.views.InfoView
 import com.school.tasktracker.views.SettingsView
-import com.school.tasktracker.views.TodoView
+import com.school.tasktracker.views.HomeView
 
 // Project so far has only been tested on emulator Medium Phone API 35
 // Should test on different emulators soon
@@ -90,8 +91,8 @@ fun MainView(modifier: Modifier = Modifier) {
                 .fillMaxSize()
         ) {
             // View content
-            NavHost(navController = navController, startDestination = Routes.todo) {
-                composable(Routes.todo) { TodoView(viewModel = viewModel) }
+            NavHost(navController = navController, startDestination = Routes.home) {
+                composable(Routes.home) { HomeView(viewModel = viewModel) }
                 composable(Routes.settings) { SettingsView(viewModel = viewModel) }
                 composable(Routes.info) { InfoView() }
                 composable(Routes.addView) { AddTaskView(viewModel = viewModel) }
@@ -158,7 +159,7 @@ fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navContro
                     selectedItemIndex = index
                     viewModel.updateViewNumber(selectedItemIndex)
                     when (viewModel.viewNumber.value) {
-                        0 -> navController.navigate(Routes.todo)
+                        0 -> navController.navigate(Routes.home)
                         1 -> navController.navigate(Routes.settings)
                         2 -> navController.navigate(Routes.info)
                         3 -> navController.navigate(Routes.addView)

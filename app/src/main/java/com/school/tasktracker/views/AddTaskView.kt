@@ -39,6 +39,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
@@ -48,16 +50,17 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import java.util.*
 import java.text.SimpleDateFormat
+import com.school.tasktracker.components.HalfStarIcon
 
 // Logic will be implemented later
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun AddTaskView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
-    var title = remember { mutableStateOf("") }
+    val title = remember { mutableStateOf("") }
     var date: Date
-    var description = remember { mutableStateOf("") }
-    var isPriority = remember { mutableStateOf(false) }
+    val description = remember { mutableStateOf("") }
+    val isPriority = remember { mutableStateOf(false) }
     Column(
         modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -195,55 +198,6 @@ fun ScrollableTextField(text: MutableState<String>) {
 }
 
 @Composable
-fun HalfStarIcon(filled: Boolean) {
-    val iconSize = 36.dp
-
-    val outlineColor = if (filled) Color.Red else Color.Gray
-    val halfFillColor = if (filled) Color.Red else Color.Gray
-    val backgroundColor = if (filled) Color.White else Color.LightGray
-
-    // Custom shape to clip only half of the star
-    val halfShape = GenericShape { size, _ ->
-        lineTo(size.width / 2, 0f)
-        lineTo(size.width / 2, size.height)
-        lineTo(0f, size.height)
-        close()
-    }
-
-    Box(
-        modifier = Modifier
-            .size(iconSize)
-            .offset(y = (-3).dp)
-    ) {
-        // Draw the outline (empty star) with the specified outline color
-        Icon(
-            imageVector = Icons.Outlined.Star,
-            contentDescription = "Empty Star Outline",
-            tint = outlineColor,
-            modifier = Modifier.size(iconSize)
-        )
-
-        // Draw a filled background star with the specified background color
-        Icon(
-            imageVector = Icons.Filled.Star,
-            contentDescription = "White Background",
-            tint = backgroundColor,
-            modifier = Modifier.size(iconSize)
-        )
-
-        // Overlay with a clipped star to fill half of it with the specified half fill color
-        Icon(
-            imageVector = Icons.Filled.Star,
-            contentDescription = "Half Star",
-            tint = halfFillColor,
-            modifier = Modifier
-                .size(iconSize)
-                .clip(halfShape)
-        )
-    }
-}
-
-@Composable
 fun SaveRow(modifier: Modifier = Modifier) {
     Spacer(modifier = modifier.height(5.dp))
     Row(
@@ -251,11 +205,22 @@ fun SaveRow(modifier: Modifier = Modifier) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
-        Button(onClick = {}) {
+        Button(
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Red
+            ),
+            onClick = {}
+        ) {
             Text("Cancel")
         }
         Spacer(modifier = modifier.width(20.dp))
-        Button(onClick = {}) {
+        Button(
+            colors = ButtonDefaults.buttonColors(
+                // Darker shade of green, compared to the lime green default
+                containerColor = Color(0xFF007F00)
+            ),
+            onClick = {}
+        ) {
             Text("Save")
         }
     }

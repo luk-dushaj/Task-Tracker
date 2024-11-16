@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,13 +37,21 @@ import com.school.tasktracker.components.TextRow
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Task
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
+import com.school.tasktracker.components.HalfStarIcon
 
 @Composable
-fun TodoView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+fun HomeView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
     // Separate between priority lists
     val tasks = viewModel.tasks
-    val distance = Modifier.offset(y = 165.dp)
-    Column {
+    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
+    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
+    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
+    Column (
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(15.dp),
+        verticalArrangement = Arrangement.spacedBy(25.dp)
+    ) {
         // Have to wrap priorites text in a box
         // So I can easily dyanmically center it
         Box(
@@ -48,7 +60,7 @@ fun TodoView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
         ) {
             Text(
                 text = if (tasks.value.isNullOrEmpty()) "There are currently no tasks" else "Tasks",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center
             )
@@ -62,7 +74,8 @@ fun TodoView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
 fun ColoredLine(modifier: Modifier = Modifier, color: Color) {
     HorizontalDivider(
         modifier = modifier
-            .width(30.dp),
+            .width(30.dp)
+            .offset(x = (-5).dp),
         color = color,
         thickness = 2.dp
     )
@@ -75,45 +88,31 @@ fun PriorityComposable(
     viewModel: MainViewModel
 ) {
     val tasks = viewModel.tasks
-    if (isPriority) {
-        Column {
-            Row {
-                TextRow(
-                    color = Color.Gray,
-                    title = "High"
-                )
-                Spacer(modifier = modifier.width(4.dp))
+    Column {
+        Row {
+            TextRow(
+                color = Color.Gray,
+                weight = FontWeight.ExtraBold,
+                title = if (isPriority) "High Priority" else "Low Priority"
+            )
+            Spacer(modifier = modifier.width(4.dp))
+            if (isPriority) {
                 HalfStarIcon(filled = true)
             }
-            ColoredLine(color = Color.Red)
         }
-        Spacer(
-            modifier = modifier
-                .height(20.dp)
-        )
-        LazyRow {
-            items(tasks.value!!) { item ->
-                TaskDesign(title = item.title, days = 0, color = Color.Red)
-            }
-        }
-    } else {
-        Column {
-            Row {
-                TextRow(
-                    color = Color.Gray,
-                    title = "Low"
-                )
-            }
-            ColoredLine(color = Color.Blue)
-        }
-        Spacer(
-            modifier = modifier
-                .height(20.dp)
-        )
-        LazyRow {
-            items(tasks.value!!) { item ->
-                TaskDesign(title = item.title, days = 0, color = Color.Blue)
-            }
+        Spacer(modifier = modifier.height(5.dp))
+        ColoredLine(color = if (isPriority) Color.Red else Color.Blue)
+    }
+    LazyRow {
+        items(tasks.value!!) { item ->
+            TaskDesign(
+                title = item.title,
+                days = 0,
+                color = if (isPriority) Color(red = 245, green = 104, blue = 115) else Color(red = 115, green = 152, blue = 245)
+            )
+            Spacer(
+                modifier = modifier.width(10.dp)
+            )
         }
     }
 }
@@ -130,7 +129,7 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
                 .padding(15.dp)
         ) {
             Text(
-                text = "$title",
+                text = title,
                 color = Color.White,
                 style = MaterialTheme.typography.headlineSmall,
             )
@@ -149,11 +148,11 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewTodoView() {
+fun PreviewHomeView() {
     TaskTrackerTheme {
         Surface {
-//            TodoView(viewModel = viewModel())
-            PriorityComposable(viewModel = viewModel(), isPriority = false)
+            HomeView(viewModel = viewModel())
+//            PriorityComposable(viewModel = viewModel(), isPriority = false)
 //            ColoredLine(color = Color.Blue)
         }
     }

@@ -2,7 +2,6 @@
 
 ## 1. Implement Task functionality:
   - Create Task view to insert into TodoView ***so the user can see their tasks on the homescreen***
-  - Create add task view
   - Manage loading in tasks from modelView and obviously create saving functionality
   - Create tasks.json
   - Create edit view to also edit an individual task
