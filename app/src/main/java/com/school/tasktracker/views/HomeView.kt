@@ -1,6 +1,7 @@
 package com.school.tasktracker.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,20 +34,53 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.school.tasktracker.components.TextRow
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Task
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import com.school.tasktracker.components.HalfStarIcon
+import com.school.tasktracker.components.PriorityComposable
+import com.school.tasktracker.data.Routes
 
 @Composable
-fun HomeView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+fun HomeView(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    navController: NavController
+) {
     // Separate between priority lists
     val tasks = viewModel.tasks
-    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
-    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
-    viewModel.addTask(Task(title = "Example", description = "Due soon", date = "", time = "", isPriority = false))
-    Column (
+    viewModel.addTask(
+        Task(
+            title = "Example",
+            description = "Due soon",
+            date = "10/15/2024",
+            time = "4:27 PM",
+            isPriority = true
+        )
+    )
+    viewModel.addTask(
+        Task(
+            title = "Example",
+            description = "Due soon",
+            date = "",
+            time = "",
+            isPriority = false
+        )
+    )
+    viewModel.addTask(
+        Task(
+            title = "Example",
+            description = "Due soon",
+            date = "",
+            time = "",
+            isPriority = false
+        )
+    )
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(15.dp),
@@ -59,88 +93,29 @@ fun HomeView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (tasks.value.isNullOrEmpty()) "There are currently no tasks" else "Tasks",
+                text = if (viewModel.isTasksEmpty()) "There are currently no tasks" else "Tasks",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center
             )
         }
-        PriorityComposable(isPriority = true, viewModel = viewModel)
-        PriorityComposable(isPriority = false, viewModel = viewModel)
-    }
-}
-
-@Composable
-fun ColoredLine(modifier: Modifier = Modifier, color: Color) {
-    HorizontalDivider(
-        modifier = modifier
-            .width(30.dp)
-            .offset(x = (-5).dp),
-        color = color,
-        thickness = 2.dp
-    )
-}
-
-@Composable
-fun PriorityComposable(
-    modifier: Modifier = Modifier,
-    isPriority: Boolean,
-    viewModel: MainViewModel
-) {
-    val tasks = viewModel.tasks
-    Column {
-        Row {
-            TextRow(
-                color = Color.Gray,
-                weight = FontWeight.ExtraBold,
-                title = if (isPriority) "High Priority" else "Low Priority"
+        if (!viewModel.isTasksEmpty()) {
+            // Spacing like this below to cover more area of the screen
+            Spacer(
+                modifier = modifier.height(5.dp)
             )
-            Spacer(modifier = modifier.width(4.dp))
-            if (isPriority) {
-                HalfStarIcon(filled = true)
-            }
-        }
-        Spacer(modifier = modifier.height(5.dp))
-        ColoredLine(color = if (isPriority) Color.Red else Color.Blue)
-    }
-    LazyRow {
-        items(tasks.value!!) { item ->
-            TaskDesign(
-                title = item.title,
-                days = 0,
-                color = if (isPriority) Color(red = 245, green = 104, blue = 115) else Color(red = 115, green = 152, blue = 245)
+            PriorityComposable(
+                isPriority = true,
+                viewModel = viewModel,
+                navController = navController
             )
             Spacer(
-                modifier = modifier.width(10.dp)
+                modifier = modifier.height(55.dp)
             )
-        }
-    }
-}
-
-@Composable
-fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: Color) {
-    Box(
-        modifier = modifier
-            .background(color = color)
-            .clip(RoundedCornerShape(8.dp))
-    ) {
-        Column(
-            modifier = modifier
-                .padding(15.dp)
-        ) {
-            Text(
-                text = title,
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            Spacer(
-                modifier = modifier
-                    .height(25.dp)
-            )
-            Text(
-                text = "Time Left: $days Days",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium
+            PriorityComposable(
+                isPriority = false,
+                viewModel = viewModel,
+                navController = navController
             )
         }
     }
@@ -151,7 +126,7 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
 fun PreviewHomeView() {
     TaskTrackerTheme {
         Surface {
-            HomeView(viewModel = viewModel())
+            HomeView(viewModel = viewModel(), navController = rememberNavController())
 //            PriorityComposable(viewModel = viewModel(), isPriority = false)
 //            ColoredLine(color = Color.Blue)
         }

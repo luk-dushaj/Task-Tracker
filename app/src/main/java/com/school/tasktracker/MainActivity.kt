@@ -47,9 +47,13 @@ import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
+import com.school.tasktracker.data.Task
 import com.school.tasktracker.views.AddTaskView
+import com.school.tasktracker.views.DetailView
 import com.school.tasktracker.views.HomeView
 import com.school.tasktracker.views.InfoView
 import com.school.tasktracker.views.SettingsView
@@ -92,10 +96,11 @@ fun MainView(modifier: Modifier = Modifier) {
         ) {
             // View content
             NavHost(navController = navController, startDestination = Routes.home) {
-                composable(Routes.home) { HomeView(viewModel = viewModel) }
+                composable(Routes.home) { HomeView(viewModel = viewModel, navController = navController) }
                 composable(Routes.settings) { SettingsView(viewModel = viewModel) }
                 composable(Routes.info) { InfoView() }
-                composable(Routes.addView) { AddTaskView(viewModel = viewModel) }
+                composable(Routes.add) { AddTaskView(viewModel = viewModel) }
+                composable(Routes.detail) { DetailView(viewModel = viewModel, navController = navController) }
             }
         }
     }
@@ -162,7 +167,7 @@ fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navContro
                         0 -> navController.navigate(Routes.home)
                         1 -> navController.navigate(Routes.settings)
                         2 -> navController.navigate(Routes.info)
-                        3 -> navController.navigate(Routes.addView)
+                        3 -> navController.navigate(Routes.add)
                     }
                 }
             )

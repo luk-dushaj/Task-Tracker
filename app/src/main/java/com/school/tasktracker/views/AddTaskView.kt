@@ -1,6 +1,7 @@
 package com.school.tasktracker.views
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager.TaskDescription
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
@@ -47,20 +48,32 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import java.util.Calendar
 import java.util.*
 import java.text.SimpleDateFormat
 import com.school.tasktracker.components.HalfStarIcon
+import com.school.tasktracker.data.Routes
 
 // Logic will be implemented later
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun AddTaskView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
-    val title = remember { mutableStateOf("") }
-    var date: Date
-    val description = remember { mutableStateOf("") }
-    val isPriority = remember { mutableStateOf(false) }
+fun AddTaskView(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    editable: Boolean = false,
+    navController: NavController,
+    title: String = "",
+    description: String = "",
+    isPriority: Boolean = false,
+    date: String = "",
+    time: String = ""
+) {
+    val title = remember { mutableStateOf(title) }
+    val description = remember { mutableStateOf(description) }
+    val isPriority = remember { mutableStateOf(isPriority) }
     Column(
         modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -70,7 +83,7 @@ fun AddTaskView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
         DateTimeInput()
         TextRow("Task Description")
         ScrollableTextField(text = description)
-        SaveRow()
+        SaveRow(navController = navController)
     }
 }
 
@@ -88,7 +101,6 @@ fun DateTimeInput() {
     var date by remember { mutableStateOf(dateFormat.format(calendar.time)) }
     var time by remember { mutableStateOf(timeFormat.format(calendar.time)) }
 
-    // Date picker dialog
     val datePickerDialog = DatePickerDialog(
         context,
         { _, month, dayOfMoth, year ->
@@ -100,7 +112,6 @@ fun DateTimeInput() {
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    // Time picker dialog with 12-hour format (AM/PM)
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hourOfDay, minute ->
@@ -198,7 +209,7 @@ fun ScrollableTextField(text: MutableState<String>) {
 }
 
 @Composable
-fun SaveRow(modifier: Modifier = Modifier) {
+fun SaveRow(modifier: Modifier = Modifier, navController: NavController) {
     Spacer(modifier = modifier.height(5.dp))
     Row(
         modifier = modifier
@@ -209,7 +220,7 @@ fun SaveRow(modifier: Modifier = Modifier) {
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red
             ),
-            onClick = {}
+            onClick = {navController.navigate(Routes.home)}
         ) {
             Text("Cancel")
         }
@@ -219,7 +230,7 @@ fun SaveRow(modifier: Modifier = Modifier) {
                 // Darker shade of green, compared to the lime green default
                 containerColor = Color(0xFF007F00)
             ),
-            onClick = {}
+            onClick = {navController.popBackStack()}
         ) {
             Text("Save")
         }
@@ -231,7 +242,7 @@ fun SaveRow(modifier: Modifier = Modifier) {
 fun AddTaskPreview() {
     TaskTrackerTheme {
         Surface {
-            AddTaskView(viewModel = MainViewModel())
+            AddTaskView(viewModel = MainViewModel(), navController = rememberNavController())
         }
     }
 }

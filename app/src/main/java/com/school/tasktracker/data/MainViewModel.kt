@@ -1,8 +1,12 @@
 package com.school.tasktracker.data
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.UUID
 
 
 // ViewModel is going to be used for sharing data across views in a unified way
@@ -13,6 +17,14 @@ class MainViewModel: ViewModel() {
 
     private var _tasks = MutableLiveData<List<Task>>(emptyList())
     var tasks: LiveData<List<Task>> = _tasks
+
+    fun isTasksEmpty(): Boolean {
+        if (_tasks.value!!.isEmpty()) {
+            return true
+        } else {
+            return false
+        }
+    }
 
     fun addTask(task: Task) {
         // Get the current list or an empty list if null, then add the new task
@@ -30,6 +42,12 @@ class MainViewModel: ViewModel() {
         }
         _tasks.value = updatedList
     }
+
+    fun isTask(id: UUID): Boolean {
+        return _tasks.value?.any { it.id == id } == true
+    }
+
+    var selectedTask: Task? by mutableStateOf(null)
 
     private var _infoValue = MutableLiveData(List(6) { false })
     val infoValue: LiveData<List<Boolean>> = _infoValue

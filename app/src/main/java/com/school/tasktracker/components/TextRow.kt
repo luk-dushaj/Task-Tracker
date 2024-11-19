@@ -18,10 +18,9 @@ fun TextRow(
 ) {
     Text(
         text = title,
-        style = style.copy(
-            fontWeight = weight,
-            color = color
-        ),
+        style = style,
+        fontWeight = weight,
+        color = color,
         modifier = modifier
     )
 }

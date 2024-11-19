@@ -4,5 +4,7 @@ object Routes {
     var home = "home"
     var settings = "settings"
     var info = "info"
-    var addView = "addView"
+    var add = "add"
+    var edit = "edit"
+    var detail = "detail"
 }
