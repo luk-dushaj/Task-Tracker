@@ -43,6 +43,7 @@ import com.school.tasktracker.data.Task
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import com.school.tasktracker.components.HalfStarIcon
 import com.school.tasktracker.components.PriorityComposable
+import com.school.tasktracker.components.TaskContent
 import com.school.tasktracker.data.Routes
 
 @Composable
@@ -53,33 +54,6 @@ fun HomeView(
 ) {
     // Separate between priority lists
     val tasks = viewModel.tasks
-    viewModel.addTask(
-        Task(
-            title = "Example",
-            description = "Due soon",
-            date = "10/15/2024",
-            time = "4:27 PM",
-            isPriority = true
-        )
-    )
-    viewModel.addTask(
-        Task(
-            title = "Example",
-            description = "Due soon",
-            date = "",
-            time = "",
-            isPriority = false
-        )
-    )
-    viewModel.addTask(
-        Task(
-            title = "Example",
-            description = "Due soon",
-            date = "",
-            time = "",
-            isPriority = false
-        )
-    )
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -101,22 +75,7 @@ fun HomeView(
         }
         if (!viewModel.isTasksEmpty()) {
             // Spacing like this below to cover more area of the screen
-            Spacer(
-                modifier = modifier.height(5.dp)
-            )
-            PriorityComposable(
-                isPriority = true,
-                viewModel = viewModel,
-                navController = navController
-            )
-            Spacer(
-                modifier = modifier.height(55.dp)
-            )
-            PriorityComposable(
-                isPriority = false,
-                viewModel = viewModel,
-                navController = navController
-            )
+            TaskContent(viewModel = viewModel, navController = navController)
         }
     }
 }

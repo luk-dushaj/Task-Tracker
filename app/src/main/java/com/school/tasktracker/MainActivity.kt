@@ -1,4 +1,5 @@
 package com.school.tasktracker
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -54,10 +55,12 @@ import com.school.tasktracker.data.Routes
 import com.school.tasktracker.data.Task
 import com.school.tasktracker.views.AddTaskView
 import com.school.tasktracker.views.DetailView
+import com.school.tasktracker.views.EditView
 import com.school.tasktracker.views.HomeView
 import com.school.tasktracker.views.InfoView
 import com.school.tasktracker.views.SettingsView
 import com.school.tasktracker.views.HomeView
+import com.school.tasktracker.views.SelectionView
 
 // Project so far has only been tested on emulator Medium Phone API 35
 // Should test on different emulators soon
@@ -82,7 +85,7 @@ fun MainView(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     Scaffold(
         topBar = {
-            TopBar(modifier = modifier, viewModel = viewModel)
+            TopBar(modifier = modifier, viewModel = viewModel, navController = navController)
         },
         bottomBar = {
             BottomBar(viewModel = viewModel, navController = navController)
@@ -96,20 +99,41 @@ fun MainView(modifier: Modifier = Modifier) {
         ) {
             // View content
             NavHost(navController = navController, startDestination = Routes.home) {
-                composable(Routes.home) { HomeView(viewModel = viewModel, navController = navController) }
+                composable(Routes.home) {
+                    HomeView(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
+                }
                 composable(Routes.settings) { SettingsView(viewModel = viewModel) }
                 composable(Routes.info) { InfoView() }
-                composable(Routes.add) { AddTaskView(viewModel = viewModel) }
-                composable(Routes.detail) { DetailView(viewModel = viewModel, navController = navController) }
+                composable(Routes.add) {
+                    AddTaskView(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
+                }
+                composable(Routes.detail) {
+                    DetailView(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
+                }
+                composable(Routes.selection) {
+                    SelectionView(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
     val viewNumber = viewModel.viewNumber.observeAsState().value ?: 0
-    Row (
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
@@ -124,28 +148,41 @@ fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel) {
             fontWeight = FontWeight.Medium
         )
         // If Home is currently selected show Edit button
-        if (viewNumber == 0) {
+        if (viewNumber == 0 && !viewModel.isTasksEmpty()) {
             Button(
                 onClick = {
-                    // Going to add edit view later
+                    viewModel.toggleSelectionView()
+                    navController.navigate(Routes.selection)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.DarkGray
                 )
             ) {
-                Text("Edit")
+                Text(
+                    text = if (viewModel.isSelectionViewActive()) "Done" else "Edit"
+                )
             }
+
         }
     }
 }
 
 @Composable
-fun BottomBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
+fun BottomBar(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    navController: NavController
+) {
     var selectedItemIndex by remember { mutableIntStateOf(0) }
 
     val items = listOf("Home", "Settings", "Info", "Add")
     val selectedIcons = listOf(Filled.Home, Filled.Settings, Filled.Info, Filled.AddCircle)
-    val unselectedIcons = listOf(Icons.Outlined.Home, Icons.Outlined.Settings, Icons.Outlined.Info, Icons.Outlined.Add)
+    val unselectedIcons = listOf(
+        Icons.Outlined.Home,
+        Icons.Outlined.Settings,
+        Icons.Outlined.Info,
+        Icons.Outlined.Add
+    )
 
     NavigationBar {
         items.forEachIndexed { index, item ->

@@ -55,8 +55,11 @@ import java.util.*
 import java.text.SimpleDateFormat
 import com.school.tasktracker.components.HalfStarIcon
 import com.school.tasktracker.data.Routes
+import com.school.tasktracker.data.Task
 
 // Logic will be implemented later
+
+// This view will also be used as a view to edit a existing Task's properties
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -71,41 +74,51 @@ fun AddTaskView(
     date: String = "",
     time: String = ""
 ) {
-    val title = remember { mutableStateOf(title) }
-    val description = remember { mutableStateOf(description) }
-    val isPriority = remember { mutableStateOf(isPriority) }
+    val titleState = remember { mutableStateOf(title) }
+    val descriptionState = remember { mutableStateOf(description) }
+    val isPriorityState = remember { mutableStateOf(isPriority) }
+    val dateState = remember { mutableStateOf(date) }
+    val timeState = remember { mutableStateOf(time) }
     Column(
         modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        TaskTitle(title = title, isPriority = isPriority)
+        TaskTitle(title = titleState, isPriority = isPriorityState)
         TextRow("Date and time to complete by")
-        DateTimeInput()
+        DateTimeInput(date = dateState, time = timeState)
         TextRow("Task Description")
-        ScrollableTextField(text = description)
-        SaveRow(navController = navController)
+        ScrollableTextField(text = descriptionState)
+        SaveRow(
+            viewModel = viewModel,
+            navController = navController,
+            title = titleState.value,
+            description = descriptionState.value,
+            isPriority = isPriorityState.value,
+            date = dateState.value,
+            time = timeState.value
+        )
     }
 }
 
 @Composable
-fun DateTimeInput() {
+fun DateTimeInput(date: MutableState<String>, time: MutableState<String>) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
     // Set date and time format with AM/PM
-    val dateFormat = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
+    val dateFormat = SimpleDateFormat(date.value.ifBlank { "MM-dd-yyyy" }, Locale.getDefault())
 
-    val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val timeFormat = SimpleDateFormat(time.value.ifBlank { "hh:mm a" }, Locale.getDefault())
 
     // Mutable state for the date and time input, initialized with current date and time
-    var date by remember { mutableStateOf(dateFormat.format(calendar.time)) }
-    var time by remember { mutableStateOf(timeFormat.format(calendar.time)) }
+    var dateState by remember { mutableStateOf(dateFormat.format(calendar.time)) }
+    var timeState by remember { mutableStateOf(timeFormat.format(calendar.time)) }
 
     val datePickerDialog = DatePickerDialog(
         context,
         { _, month, dayOfMoth, year ->
             calendar.set(month, dayOfMoth, year)
-            date = dateFormat.format(calendar.time)
+            date.value = dateFormat.format(calendar.time)
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -117,7 +130,7 @@ fun DateTimeInput() {
         { _, hourOfDay, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
             calendar.set(Calendar.MINUTE, minute)
-            time = timeFormat.format(calendar.time)
+            time.value = timeFormat.format(calendar.time)
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
@@ -134,7 +147,7 @@ fun DateTimeInput() {
             Text(
                 modifier = Modifier
                     .offset(x = 12.dp),
-                text = date
+                text = dateState
             )
             Button(onClick = { datePickerDialog.show() }) {
                 Text("Select Date")
@@ -145,7 +158,7 @@ fun DateTimeInput() {
             Text(
                 modifier = Modifier
                     .offset(x = 24.dp),
-                text = time
+                text = timeState
             )
             Button(onClick = { timePickerDialog.show() }) {
                 Text("Select Time")
@@ -209,8 +222,23 @@ fun ScrollableTextField(text: MutableState<String>) {
 }
 
 @Composable
-fun SaveRow(modifier: Modifier = Modifier, navController: NavController) {
+fun SaveRow(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    navController: NavController,
+    title: String = "",
+    description: String = "",
+    isPriority: Boolean = false,
+    date: String = "",
+    time: String = ""
+) {
+    var error by remember { mutableStateOf(false) }
     Spacer(modifier = modifier.height(5.dp))
+    if (error) {
+        Text(
+            text = "Make sure all the values are filled and the date is in the distant future"
+        )
+    }
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -230,11 +258,43 @@ fun SaveRow(modifier: Modifier = Modifier, navController: NavController) {
                 // Darker shade of green, compared to the lime green default
                 containerColor = Color(0xFF007F00)
             ),
-            onClick = {navController.popBackStack()}
+            onClick = {
+                error = errorChecking(
+                    title = title,
+                    description = description,
+                    date = date,
+                    time = time
+                )
+                if (!error) {
+                    viewModel.addTask(
+                        Task (
+                            title = title,
+                            description = description,
+                            isPriority = isPriority,
+                            date = date,
+                            time = time
+                        )
+                    )
+                    navController.navigate(Routes.home)
+                }
+            }
         ) {
             Text("Save")
         }
     }
+}
+
+fun errorChecking(
+    title: String,
+    description: String,
+    date: String,
+    time: String
+): Boolean {
+    if (title.isBlank() && description.isBlank() && date.isBlank() && time.isBlank()) {
+        return true
+    }
+    // Eventually check for if time is greater than current time
+    return false
 }
 
 @Preview(showBackground = true)

@@ -7,4 +7,5 @@ object Routes {
     var add = "add"
     var edit = "edit"
     var detail = "detail"
+    var selection = "selection"
 }

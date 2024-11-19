@@ -15,6 +15,17 @@ import java.util.UUID
 // There will be a lot of example data for now because I am focusing on the UI currently
 class MainViewModel: ViewModel() {
 
+    private var _isSelectionView = MutableLiveData(false)
+    var isSelectonView = _isSelectionView
+
+    fun toggleSelectionView() {
+        _isSelectionView.value = _isSelectionView.value != true
+    }
+
+    fun isSelectionViewActive(): Boolean {
+        return _isSelectionView.value == true
+    }
+
     private var _tasks = MutableLiveData<List<Task>>(emptyList())
     var tasks: LiveData<List<Task>> = _tasks
 
