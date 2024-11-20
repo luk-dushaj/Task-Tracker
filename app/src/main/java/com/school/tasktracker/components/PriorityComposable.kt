@@ -33,8 +33,6 @@ fun PriorityComposable(
     editable: Boolean = false
 ) {
     val tasks = viewModel.getTasksByPriority(isPriority = isPriority)
-    // If there is no tasks based on the priority leave the whole composable empty
-    if (tasks.isEmpty()) return
     Column (
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
