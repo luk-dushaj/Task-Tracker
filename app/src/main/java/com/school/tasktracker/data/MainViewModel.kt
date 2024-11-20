@@ -58,6 +58,13 @@ class MainViewModel: ViewModel() {
         return _tasks.value?.any { it.id == id } == true
     }
 
+    fun getTasksByPriority(isPriority: Boolean): List<Task> {
+        return _tasks.value
+            ?.filter { it.isPriority == isPriority } // Filter tasks based on isPriority
+            ?.sortedByDescending { it.isPriority } // Sort by priority if needed
+            ?: emptyList() // Return empty list of not found
+    }
+
     var selectedTask: Task? by mutableStateOf(null)
 
     private var _infoValue = MutableLiveData(List(6) { false })
@@ -96,8 +103,6 @@ class MainViewModel: ViewModel() {
     val theme : LiveData<String> = _theme
 
     fun updateViewNumber(newNumber: Int) {
-        // ?: is the Elvis operator, means if the value preceding ?: is null then insert the change the value to the right of ?:
-        // https://stackoverflow.com/questions/48253107/what-does-do-in-kotlin-elvis-operator
         _viewNumber.value = newNumber
     }
 

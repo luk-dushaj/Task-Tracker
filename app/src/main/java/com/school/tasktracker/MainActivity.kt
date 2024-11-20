@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -79,8 +80,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
-    // Need elvis operator here incase if value is null
-
     val viewModel = MainViewModel()
     val navController = rememberNavController()
     Scaffold(
@@ -149,17 +148,23 @@ fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navControlle
         )
         // If Home is currently selected show Edit button
         if (viewNumber == 0 && !viewModel.isTasksEmpty()) {
+            var isSelectionActive by remember { mutableStateOf(false) }
             Button(
                 onClick = {
-                    viewModel.toggleSelectionView()
-                    navController.navigate(Routes.selection)
+                    if (!viewModel.isTasksEmpty() && !isSelectionActive) {
+                        isSelectionActive = true
+                        navController.navigate(Routes.selection)
+                    } else if (isSelectionActive) {
+                        isSelectionActive = false
+                        navController.navigate(Routes.home)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.DarkGray
                 )
             ) {
                 Text(
-                    text = if (viewModel.isSelectionViewActive()) "Done" else "Edit"
+                    text = if (isSelectionActive) "Done" else "Edit"
                 )
             }
 
@@ -173,6 +178,7 @@ fun BottomBar(
     viewModel: MainViewModel,
     navController: NavController
 ) {
+    val viewNumber by viewModel.viewNumber.observeAsState(initial = 0)
     var selectedItemIndex by remember { mutableIntStateOf(0) }
 
     val items = listOf("Home", "Settings", "Info", "Add")
@@ -190,17 +196,17 @@ fun BottomBar(
 
                 icon = {
                     Icon(
-                        if (selectedItemIndex == index) selectedIcons[index] else unselectedIcons[index],
+                        if (viewNumber == index) selectedIcons[index] else unselectedIcons[index],
                         contentDescription = item
                     )
                 },
 
                 label = { Text(item) },
-                selected = selectedItemIndex == index,
+                selected = viewNumber == index,
                 onClick = {
-                    selectedItemIndex = index
-                    viewModel.updateViewNumber(selectedItemIndex)
-                    when (viewModel.viewNumber.value) {
+                    viewModel.updateViewNumber(index)
+                    selectedItemIndex = viewNumber
+                    when (viewNumber) {
                         0 -> navController.navigate(Routes.home)
                         1 -> navController.navigate(Routes.settings)
                         2 -> navController.navigate(Routes.info)

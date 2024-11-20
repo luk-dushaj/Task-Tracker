@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.school.tasktracker.components.ArrowIcon
-import com.school.tasktracker.components.TextRow
 
 @Composable
 // Custom row to make it easier for me to implement ArrowIcon
@@ -26,7 +23,8 @@ fun ArrowRow(modifier: Modifier = Modifier, name: String, onClick: MutableState<
             .clickable { onClick.value = !onClick.value },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        TextRow(modifier = modifier
+        TextRow(
+            modifier = modifier
             // Align the text with the arrow
             .offset(y = 5.dp),
             title = name

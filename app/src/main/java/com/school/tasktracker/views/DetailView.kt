@@ -2,14 +2,10 @@ package com.school.tasktracker.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -21,22 +17,20 @@ import com.school.tasktracker.components.TextRow
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Task
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
-import java.util.UUID
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.school.tasktracker.data.Routes
-import java.util.Date
+import com.school.tasktracker.ui.theme.lightRed
+import com.school.tasktracker.ui.theme.lightBlue
 
 @Composable
 fun DetailView(
@@ -49,11 +43,7 @@ fun DetailView(
         Column(
             modifier = modifier
                 .background(
-                    color = if (task.isPriority) Color(
-                        red = 245,
-                        green = 104,
-                        blue = 115
-                    ) else Color(red = 115, green = 152, blue = 245)
+                    color = if (task.isPriority) lightRed else lightBlue
                 ),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally

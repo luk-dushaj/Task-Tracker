@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
+import com.school.tasktracker.ui.theme.lightBlue
+import com.school.tasktracker.ui.theme.lightRed
 
 @Composable
 // This is a composable to hold all task priority objects.
@@ -29,8 +32,12 @@ fun PriorityComposable(
     navController: NavController,
     editable: Boolean = false
 ) {
-    val tasks = viewModel.tasks
-    Column {
+    val tasks = viewModel.getTasksByPriority(isPriority = isPriority)
+    // If there is no tasks based on the priority leave the whole composable empty
+    if (tasks.isEmpty()) return
+    Column (
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
         Row {
             TextRow(
                 color = Color.Gray,
@@ -42,16 +49,12 @@ fun PriorityComposable(
                 HalfStarIcon(filled = true)
             }
         }
-        Spacer(modifier = modifier.height(5.dp))
         ColoredLine(color = if (isPriority) Color.Red else Color.Blue)
-        Spacer(
-            modifier = modifier.height(5.dp)
-        )
     }
     LazyRow (
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(tasks.value!!) { item ->
+        items(tasks) { item ->
             if (editable) {
                 TaskDesign(
                     modifier = modifier
@@ -61,11 +64,7 @@ fun PriorityComposable(
                         },
                     title = item.title,
                     days = 0,
-                    color = if (isPriority) Color(
-                        red = 245,
-                        green = 104,
-                        blue = 115
-                    ) else Color(red = 115, green = 152, blue = 245),
+                    color = if (isPriority) lightRed else lightBlue,
                     edit = true
                 )
             } else {
@@ -77,11 +76,7 @@ fun PriorityComposable(
                         },
                     title = item.title,
                     days = 0,
-                    color = if (isPriority) Color(
-                        red = 245,
-                        green = 104,
-                        blue = 115
-                    ) else Color(red = 115, green = 152, blue = 245)
+                    color = if (isPriority) lightRed else lightBlue
                 )
             }
         }
