@@ -10,7 +10,7 @@ import com.school.tasktracker.data.MainViewModel
 @Composable
 fun EditView(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
     Column {
-        PriorityComposable(isPriority = true, viewModel = viewModel, navController = navController)
-        PriorityComposable(isPriority = false, viewModel = viewModel, navController = navController)
+        PriorityComposable(isPriority = true, viewModel = viewModel, navController = navController, onClick = {})
+        PriorityComposable(isPriority = false, viewModel = viewModel, navController = navController, onClick = {})
     }
 }

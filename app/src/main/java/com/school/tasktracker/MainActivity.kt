@@ -124,6 +124,13 @@ fun MainView(modifier: Modifier = Modifier) {
                         navController = navController
                     )
                 }
+                composable(Routes.edit) {
+                    AddTaskView(
+                        viewModel = viewModel,
+                        navController = navController,
+
+                    )
+                }
             }
         }
     }

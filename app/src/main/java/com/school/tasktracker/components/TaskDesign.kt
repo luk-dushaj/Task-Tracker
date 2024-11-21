@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,23 +30,23 @@ import com.school.tasktracker.ui.theme.TaskTrackerTheme
 
 @Composable
 fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: Color, edit: Boolean = false) {
+    val displayTitle = shrinkTitle(title)
     Box(
         modifier = modifier
+            .height(175.dp)
             .background(color = color)
             .clip(RoundedCornerShape(8.dp))
     ) {
         Column(
             modifier = modifier
                 .padding(15.dp),
-            verticalArrangement = Arrangement.spacedBy(25.dp)
+            verticalArrangement = Arrangement.spacedBy(75.dp)
         ) {
-            Row (
-                horizontalArrangement = Arrangement.spacedBy(30.dp)
-            ) {
+            Row {
                 Text(
-                    text = title,
+                    text = displayTitle,
                     color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 if (edit) {
                     Icon(
@@ -62,6 +63,13 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
             )
         }
     }
+}
+
+fun shrinkTitle(title: String):String {
+    if (title.length >= 10) {
+        return "${title.take(7)}..."
+    }
+    return title
 }
 
 @Preview

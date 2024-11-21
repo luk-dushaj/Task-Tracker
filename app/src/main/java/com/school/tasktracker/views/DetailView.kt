@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -42,15 +43,16 @@ fun DetailView(
     if (task != null) {
         Column(
             modifier = modifier
+                .padding(15.dp)
                 .background(
                     color = if (task.isPriority) lightRed else lightBlue
                 ),
             verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(
                 modifier = modifier
-                    .height(150.dp)
+                    .height(50.dp)
             )
             TextRow(
                 title = task.title,

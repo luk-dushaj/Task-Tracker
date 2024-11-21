@@ -9,20 +9,19 @@ import androidx.navigation.NavController
 import com.school.tasktracker.data.MainViewModel
 
 @Composable
-fun TaskContent(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController, editable: Boolean = false) {
+fun TaskContent(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController, editable: Boolean = false, onClick: () -> Unit) {
     PriorityComposable(
         isPriority = true,
         viewModel = viewModel,
         navController = navController,
-        editable = editable
-    )
-    Spacer(
-        modifier = modifier.height(55.dp)
+        editable = editable,
+        onClick = onClick
     )
     PriorityComposable(
         isPriority = false,
         viewModel = viewModel,
         navController = navController,
-        editable = editable
+        editable = editable,
+        onClick = onClick
     )
 }

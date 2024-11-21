@@ -73,9 +73,15 @@ fun HomeView(
                 textAlign = TextAlign.Center
             )
         }
+        // FIll out the UI a bit more
+        Spacer(
+            modifier = modifier.height(10.dp)
+        )
         if (!viewModel.isTasksEmpty()) {
             // Spacing like this below to cover more area of the screen
-            TaskContent(viewModel = viewModel, navController = navController)
+            TaskContent(viewModel = viewModel, navController = navController, onClick = {
+                navController.navigate(Routes.detail)
+            })
         }
     }
 }

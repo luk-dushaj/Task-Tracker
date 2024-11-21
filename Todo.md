@@ -11,5 +11,5 @@
 - Encrypting tasks.json so no other app or user without permission can access it
 
 # Currently working on:
-- Wrapping up base UI like implementing Selection/Edit View
-- Fixing any bugs related to the UI navigation along with State management and adding if needed
+**Implementing functionality Selection/Edit view like:**
+- Making sure Select/All/Delete fully work as intended along with editing the task

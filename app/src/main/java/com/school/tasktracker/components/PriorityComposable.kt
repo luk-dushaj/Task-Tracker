@@ -25,11 +25,14 @@ import com.school.tasktracker.ui.theme.lightRed
 // This is a composable to hold all task priority objects.
 // By default is used for HomeView with onClick opening a DetailView
 // Editable is for the SelectionView and which leads to EditView
+// onClick serves as a flexible way to reuse the same component in different ways:
+// HomeView -> SelectionView -> EditView
 fun PriorityComposable(
     modifier: Modifier = Modifier,
     isPriority: Boolean,
     viewModel: MainViewModel,
     navController: NavController,
+    onClick: () -> Unit,
     editable: Boolean = false
 ) {
     val tasks = viewModel.getTasksByPriority(isPriority = isPriority)
@@ -58,7 +61,7 @@ fun PriorityComposable(
                     modifier = modifier
                         .clickable {
                             viewModel.selectedTask = item
-                            navController.navigate(Routes.edit)
+                            onClick()
                         },
                     title = item.title,
                     days = 0,
@@ -70,7 +73,7 @@ fun PriorityComposable(
                     modifier = modifier
                         .clickable {
                             viewModel.selectedTask = item
-                            navController.navigate(Routes.detail)
+                            onClick()
                         },
                     title = item.title,
                     days = 0,
