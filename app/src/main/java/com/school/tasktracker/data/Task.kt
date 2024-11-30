@@ -10,7 +10,7 @@ import java.util.UUID
 // Implemented as data class because we are managing the objects in a array
 // All the standard methods like delete/create will be in the array
 // editing will mainly be accessing the properties from the objects via dot notation
-class Task (
+data class Task (
     val id: UUID = UUID.randomUUID(),
     var title: String,
     var description: String,
@@ -22,16 +22,4 @@ class Task (
     // Days defaulting to 0 because evenetually I have to add a function to calculate how many days are left
     var days: Int = 0,
     var isDone: Boolean = false
-) {
-    fun decodeDateTime(dateTime: DateTime): Pair<Date?, Date?> {
-        // Initialize the same formatters used in encoding
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-
-        // Parse the date and time strings
-        val date = dateFormat.parse(date)  // Returns null if parsing fails
-        val time = timeFormat.parse(time)  // Returns null if parsing fails
-
-        return Pair(date, time)
-    }
-}
+)

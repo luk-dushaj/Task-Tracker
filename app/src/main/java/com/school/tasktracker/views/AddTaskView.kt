@@ -32,6 +32,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.SheetValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -48,19 +50,41 @@ import com.school.tasktracker.ui.theme.evergreen
 
 // This view will also be used as a view to edit a existing Task's properties
 
-@SuppressLint("DefaultLocale")
 @Composable
 fun AddTaskView(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     editable: Boolean = false,
     navController: NavController,
-    title: String = "",
-    description: String = "",
-    isPriority: Boolean = false,
-    date: String = "",
-    time: String = ""
 ) {
+    val title: String
+    val description: String
+    val isPriority: Boolean
+    val date: String
+    val time: String
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.changeEditButton(false)
+        }
+    }
+
+    // Means edit mode is on so prefill the value inputs
+    if (viewModel.selectedTask != null) {
+        val task = viewModel.selectedTask!!
+        title = task.title
+        description = task.description
+        isPriority = task.isPriority
+        date = task.date
+        time = task.date
+    // Just normal default values when creating a task
+    } else {
+        title = ""
+        description = ""
+        isPriority = false
+        date = ""
+        time = ""
+    }
     val titleState = remember { mutableStateOf(title) }
     val descriptionState = remember { mutableStateOf(description) }
     val isPriorityState = remember { mutableStateOf(isPriority) }
@@ -78,11 +102,11 @@ fun AddTaskView(
         SaveRow(
             viewModel = viewModel,
             navController = navController,
-            title = titleState.value,
-            description = descriptionState.value,
-            isPriority = isPriorityState.value,
-            date = dateState.value,
-            time = timeState.value
+            titleValue = titleState.value,
+            descriptionValue = descriptionState.value,
+            isPriorityValue = isPriorityState.value,
+            dateValue = dateState.value,
+            timeValue = timeState.value
         )
     }
 }
@@ -98,8 +122,8 @@ fun DateTimeInput(date: MutableState<String>, time: MutableState<String>) {
     val timeFormat = SimpleDateFormat(time.value.ifBlank { "hh:mm a" }, Locale.getDefault())
 
     // Mutable state for the date and time input, initialized with current date and time
-    var dateState by remember { mutableStateOf(dateFormat.format(calendar.time)) }
-    var timeState by remember { mutableStateOf(timeFormat.format(calendar.time)) }
+    val dateState by remember { mutableStateOf(dateFormat.format(calendar.time)) }
+    val timeState by remember { mutableStateOf(timeFormat.format(calendar.time)) }
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -213,11 +237,12 @@ fun SaveRow(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     navController: NavController,
-    title: String = "",
-    description: String = "",
-    isPriority: Boolean = false,
-    date: String = "",
-    time: String = ""
+    editable: Boolean = viewModel.selectedTask != null,
+    titleValue: String,
+    descriptionValue: String,
+    isPriorityValue: Boolean,
+    dateValue: String,
+    timeValue: String
 ) {
     var error by remember { mutableStateOf(false) }
     Spacer(modifier = modifier.height(5.dp))
@@ -247,24 +272,39 @@ fun SaveRow(
             ),
             onClick = {
                 error = errorChecking(
-                    title = title,
-                    description = description,
-                    date = date,
-                    time = time
+                    title = titleValue,
+                    description = descriptionValue,
+                    date = dateValue,
+                    time = timeValue
                 )
-                if (!error) {
+                if (!error && !editable) {
                     viewModel.addTask(
                         Task (
-                            title = title,
-                            description = description,
-                            isPriority = isPriority,
-                            date = date,
-                            time = time
+                            title = titleValue,
+                            description = descriptionValue,
+                            isPriority = isPriorityValue,
+                            date = dateValue,
+                            time = timeValue
                         )
                     )
                     viewModel.updateViewNumber(0)
                     navController.navigate(Routes.home)
+               } else { // If editable
+                    val id = viewModel.selectedTask!!.id
+                    viewModel.updateTaskById(
+                        taskId = id,
+                        title = titleValue,
+                        description = descriptionValue,
+                        isPriority = isPriorityValue,
+                        date = dateValue,
+                        time = titleValue
+                    )
+                    viewModel.selectedTask = null
+                    // Turning it back on now
+                    viewModel.toggleSelectionView()
+                    navController.navigate(Routes.selection)
                 }
+                viewModel.changeEditButton(false)
             }
         ) {
             Text("Save")

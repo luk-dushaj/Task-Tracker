@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.school.tasktracker.ui.theme.TaskTrackerTheme
+import com.school.tasktracker.data.DateTime
+import java.util.Date
 
 @Composable
 fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: Color, edit: Boolean = false) {
@@ -34,8 +36,8 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
     Box(
         modifier = modifier
             .height(175.dp)
+            .width(135.dp)
             .background(color = color)
-            .clip(RoundedCornerShape(8.dp))
     ) {
         Column(
             modifier = modifier
@@ -52,12 +54,14 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
                     Icon(
                         imageVector = Icons.Filled.Create,
                         contentDescription = "Edit task icon",
-                        modifier = modifier.offset(y = (-10).dp)
+                        modifier = modifier.offset(
+                            x = if (displayTitle.length > 6) 2.dp else 5.dp,
+                        )
                     )
                 }
             }
             Text(
-                text = "Days left: $days days",
+                text = "Days left: $days",
                 color = Color.White,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -66,8 +70,8 @@ fun TaskDesign(modifier: Modifier = Modifier, title: String, days: Int, color: C
 }
 
 fun shrinkTitle(title: String):String {
-    if (title.length >= 10) {
-        return "${title.take(7)}..."
+    if (title.length > 6) {
+        return "${title.take(6)}..."
     }
     return title
 }
@@ -81,7 +85,7 @@ private fun PreviewTaskDesign() {
                 title = "Test",
                 days = 0,
                 color = Color.Gray,
-                edit = true
+                edit = true,
             )
         }
     }

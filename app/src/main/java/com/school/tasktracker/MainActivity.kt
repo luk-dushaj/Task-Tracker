@@ -154,15 +154,17 @@ fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navControlle
             fontWeight = FontWeight.Medium
         )
         // If Home is currently selected show Edit button
-        if (viewNumber == 0 && !viewModel.isTasksEmpty()) {
-            var isSelectionActive by remember { mutableStateOf(false) }
+        val hideEditButton = viewModel.hideEditButton.observeAsState()
+        val isSelectionActive = viewModel.isSelectionViewActive.observeAsState()
+        if (hideEditButton.value == false && viewNumber == 0) {
             Button(
                 onClick = {
-                    if (!viewModel.isTasksEmpty() && !isSelectionActive) {
-                        isSelectionActive = true
+                    if (!viewModel.isTasksEmpty() && isSelectionActive.value == false) {
+                        viewModel.toggleSelectionView()
                         navController.navigate(Routes.selection)
-                    } else if (isSelectionActive) {
-                        isSelectionActive = false
+                    } else if (isSelectionActive.value == true) {
+                        viewModel.toggleSelectionView()
+                        viewModel.selectedTask = null
                         navController.navigate(Routes.home)
                     }
                 },
@@ -171,7 +173,7 @@ fun TopBar(modifier: Modifier = Modifier, viewModel: MainViewModel, navControlle
                 )
             ) {
                 Text(
-                    text = if (isSelectionActive) "Done" else "Edit"
+                    text = if (isSelectionActive.value == true) "Done" else "Edit"
                 )
             }
 

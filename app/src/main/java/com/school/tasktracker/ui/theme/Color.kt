@@ -12,4 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val lightRed = Color(red = 245, green = 104, blue = 115)
 val lightBlue = Color(red = 115, green = 152, blue = 245)
+val darkRed = Color(red = 220, green = 20, blue = 60)
+val darkBlue = Color(red = 10, green = 50, blue = 150)
 val evergreen = Color(0xFF007F00)
