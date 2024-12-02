@@ -1,5 +1,6 @@
 package com.school.tasktracker.views
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,34 +56,41 @@ fun HomeView(
     viewModel: MainViewModel,
     navController: NavController
 ) {
+    // Observe tasks and track if empty
+    val tasks by viewModel.tasks.observeAsState(emptyList())
+    val isTasksEmpty = tasks.isEmpty()
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(15.dp),
         verticalArrangement = Arrangement.spacedBy(25.dp)
     ) {
-        // Have to wrap priorites text in a box
-        // So I can easily dyanmically center it
+        // Have to wrap priorities text in a box
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (viewModel.isTasksEmpty()) "There are currently no tasks" else "Tasks",
+                text = if (isTasksEmpty) "There are currently no tasks" else "Tasks",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center
             )
         }
-        // FIll out the UI a bit more
-        Spacer(
-            modifier = modifier.height(10.dp)
-        )
-        if (!viewModel.isTasksEmpty()) {
-            // Spacing like this below to cover more area of the screen
-            TaskContent(viewModel = viewModel, navController = navController, onClick = {
-                navController.navigate(Routes.detail)
-            })
+
+        // Fill out the UI a bit more
+        Spacer(modifier = modifier.height(10.dp))
+
+        if (!isTasksEmpty) {
+            // Show task content if tasks are not empty
+            TaskContent(
+                viewModel = viewModel,
+                navController = navController,
+                onClick = {
+                    navController.navigate(Routes.detail)
+                }
+            )
         }
     }
 }

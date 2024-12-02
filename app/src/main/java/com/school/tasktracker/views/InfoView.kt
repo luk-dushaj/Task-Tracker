@@ -1,22 +1,40 @@
 package com.school.tasktracker.views
 
-import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.school.tasktracker.components.ArrowRow
+import com.school.tasktracker.components.Line
 import com.school.tasktracker.data.InfoItem
 import com.school.tasktracker.data.MainViewModel
-import com.school.tasktracker.components.*
-import com.school.tasktracker.ui.theme.TaskTrackerTheme
+
+val infoValue = mutableStateOf(List(6) { false })
+
+private fun updateIndex(index: Int, newValue: Boolean) {
+    val tempList = infoValue.value?.toMutableList()
+    tempList?.set(index, newValue)
+    infoValue.value = tempList!!
+}
+
+fun getValue(index: Int): Boolean {
+    val value = infoValue.value.get(index)
+    if (value) {
+        return true
+    }
+    return false
+}
 
 @Composable
-fun InfoView(modifier: Modifier = Modifier) {
+fun InfoView(modifier: Modifier = Modifier, viewModel: MainViewModel) {
 
     // When you add a new item to list, make sure you update the list count in viewModels _infoValue attribute
     // viewModel is used here so I can save users state even when they switch to another view
@@ -74,7 +92,8 @@ fun InfoView(modifier: Modifier = Modifier) {
             InfoType(
                 title = item.title,
                 description = item.description,
-                index = index
+                index = index,
+                color = viewModel.getColor()
             )
         }
     }
@@ -86,20 +105,20 @@ fun InfoType(
     title: String,
     description: String,
     index: Int,
-    viewModel: MainViewModel = MainViewModel()
+    color: Color,
 ) {
     // Implement viewModel logic here to save state
     // For now I will still use MutableState
-    val bool = viewModel.getValue(index)
+    val bool = getValue(index)
     val onClick = remember { mutableStateOf(bool) }
 
-    ArrowRow(name = title, onClick = onClick)
+    ArrowRow(name = title, onClick = onClick, color = color)
 
     if (onClick.value) {
-        Line()
+        Line(color = color)
         InfoDetail(description = description)
     }
-    Line()
+    Line(color = color)
 }
 
 @Composable
@@ -111,15 +130,5 @@ fun InfoDetail(modifier: Modifier = Modifier, description: String) {
             text = description,
             style = MaterialTheme.typography.bodyLarge
         )
-    }
-}
-
-@Preview
-@Composable
-private fun InfoPreview() {
-    TaskTrackerTheme {
-        Surface {
-            InfoView()
-        }
     }
 }

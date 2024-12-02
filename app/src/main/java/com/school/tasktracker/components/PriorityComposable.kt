@@ -19,13 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.school.tasktracker.data.DateTime
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.ui.theme.darkBlue
 import com.school.tasktracker.ui.theme.darkRed
 import com.school.tasktracker.ui.theme.lightBlue
 import com.school.tasktracker.ui.theme.lightRed
 import java.util.UUID
-import com.school.tasktracker.data.DateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -65,7 +65,11 @@ fun PriorityComposable(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(filteredTasks) { item ->
-//            val daysLeft = DateTime().getDays(dueDate = item.date)
+            val daysLeft = DateTime().getDays(dueDate = item.date)
+            if (daysLeft < 0) {
+                viewModel.removeTaskById(item.id)
+                viewModel.saveTasksToFile()
+            }
             TaskDesign(
                 modifier = modifier
                     .clickable {
@@ -73,7 +77,7 @@ fun PriorityComposable(
                         onClick()
                     },
                 title = item.title,
-                days = 0,
+                days = daysLeft,
                 color = colorSelector(id = item.id, isPriority = isPriority, viewModel = viewModel, isTaskSelected = isTaskSelected),
                 edit = editable
             )

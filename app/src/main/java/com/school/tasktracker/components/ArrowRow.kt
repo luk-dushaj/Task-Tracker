@@ -10,11 +10,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
 // Custom row to make it easier for me to implement ArrowIcon
-fun ArrowRow(modifier: Modifier = Modifier, name: String, onClick: MutableState<Boolean>) {
+fun ArrowRow(modifier: Modifier = Modifier, name: String, onClick: MutableState<Boolean>, color: Color) {
     Row (
         modifier = modifier
             .padding()
@@ -27,6 +28,7 @@ fun ArrowRow(modifier: Modifier = Modifier, name: String, onClick: MutableState<
             modifier = modifier
             // Align the text with the arrow
             .offset(y = 5.dp),
+            color = color,
             title = name
         )
         ArrowIcon(flip = onClick.value)

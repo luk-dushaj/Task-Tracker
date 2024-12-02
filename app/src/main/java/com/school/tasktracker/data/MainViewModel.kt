@@ -1,35 +1,168 @@
 package com.school.tasktracker.data
 
-import android.os.Build
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
+import android.content.res.Configuration
+import android.net.Uri
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.UUID
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonParser
-import kotlinx.coroutines.flow.internal.NoOpContinuation.context
-import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileWriter
-import kotlin.coroutines.jvm.internal.CompletedContinuation.context
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.util.UUID
 
 // ViewModel is going to be used for sharing data across views in a unified way
 // And for storing important data in general like Task()
 
 // There will be a lot of example data for now because I am focusing on the UI currently
-class MainViewModel: ViewModel() {
 
+class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    @SuppressLint("StaticFieldLeak")
+    private val context: Context = application.applicationContext
     private var _tasks = MutableLiveData<List<Task>>(emptyList())
-    var tasks: LiveData<List<Task>> = _tasks
+    val tasks: LiveData<List<Task>> = _tasks
+
+    private val gson = Gson()
+    private val fileName = "tasks.json"
+
+    private val _triggerImport = MutableLiveData<Boolean>()
+    val triggerImport: LiveData<Boolean> = _triggerImport
+
+    private val _triggerExport = MutableLiveData<Boolean>()
+    val triggerExport: LiveData<Boolean> = _triggerExport
+
+    fun requestImport() {
+        _triggerImport.value = true
+        _triggerImport.value = false
+    }
+
+    fun requestExport() {
+        _triggerExport.value = true
+        _triggerExport.value = false
+    }
+
+    // Import tasks from JSON
+    fun importTasks(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Open the selected file
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val reader = InputStreamReader(inputStream)
+
+                // Deserialize the JSON to a list of tasks
+                val importedTasks: List<Task> =
+                    gson.fromJson(reader, Array<Task>::class.java).toList()
+
+                // Validate the tasks and replace current tasks
+                if (importedTasks.isNotEmpty() && validateTasks(importedTasks)) {
+                    _tasks.postValue(importedTasks)
+                    println("Tasks imported successfully.")
+                } else {
+                    println("Invalid task data in the selected file.")
+                }
+
+            } catch (e: Exception) {
+                println("Error importing tasks: ${e.message}")
+            }
+        }
+    }
+
+    // Export tasks to JSON
+    fun exportTasks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Serialize current tasks to JSON
+                val json = gson.toJson(_tasks.value.orEmpty())
+
+                // Create a new file in the app's private storage
+                val file = File(context.filesDir, fileName)
+                FileOutputStream(file).apply {
+                    write(json.toByteArray())
+                    close()
+                }
+
+                println("Tasks exported successfully.")
+            } catch (e: Exception) {
+                println("Error exporting tasks: ${e.message}")
+            }
+        }
+    }
+
+    // Validate task data (ensure all properties are correctly formatted)
+    private fun validateTasks(tasks: List<Task>): Boolean {
+        // Add validation logic (e.g., checking if all properties are not null)
+        return tasks.all {
+            it.title.isNotBlank() && it.description.isNotBlank() && it.date.isNotBlank()
+        }
+    }
+
+    // Helper function to write tasks to the provided URI (for export)
+    fun saveTasksToUri(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val json = gson.toJson(_tasks.value.orEmpty())
+                val outputStream = context.contentResolver.openOutputStream(uri)
+                outputStream?.write(json.toByteArray())
+                outputStream?.close()
+                println("Tasks exported successfully.")
+            } catch (e: Exception) {
+                println("Error saving tasks to URI: ${e.message}")
+            }
+        }
+    }
+
+    // Initialize the file with an empty list if it doesn't exist
+    fun initializeTasksFile() {
+        val file = File(context.filesDir, fileName)
+        if (!file.exists()) {
+            file.writeText("[]")  // Create an empty JSON array if the file doesn't exist
+        }
+    }
+
+    // Save tasks to file
+    fun saveTasksToFile() {
+        try {
+            val file = File(context.filesDir, fileName)
+            val json = gson.toJson(_tasks.value.orEmpty()) // Serialize list to JSON
+            file.writeText(json) // Write JSON to file
+        } catch (e: Exception) {
+            Log.e("TaskFile", "Error saving tasks to file: ${e.message}")
+        }
+    }
+
+    // Load tasks from file asynchronously
+    fun loadTasksFromFile() {
+        // Load tasks on a background thread to avoid blocking UI thread
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, fileName)
+                if (file.exists()) {
+                    val json = file.readText() // Read JSON from file
+                    val loadedTasks = gson.fromJson(json, Array<Task>::class.java)
+                        .toList() // Deserialize JSON to list of Task
+                    // Update LiveData on the main thread after loading
+                    _tasks.postValue(loadedTasks) // Use postValue to update LiveData from background thread
+                }
+            } catch (e: Exception) {
+                Log.e("TaskFile", "Error loading tasks from file: ${e.message}")
+            }
+        }
+    }
+
 
     fun isTasksEmpty(): Boolean {
         if (_tasks.value!!.isEmpty()) {
@@ -58,10 +191,6 @@ class MainViewModel: ViewModel() {
         return _tasks.value?.any { it.id == id } == true
     }
 
-    // Function that uses kotlins receiver feature
-    // https://stackoverflow.com/questions/45875491/what-is-a-receiver-in-kotlin
-    // This serves as a easy function for getting task by id and editing its properties
-
     fun updateTaskById(
         taskId: UUID,
         title: String,
@@ -86,7 +215,6 @@ class MainViewModel: ViewModel() {
                 time = time
             )
 
-            // Update the LiveData value
             _tasks.value = updatedTasks
         }
     }
@@ -173,7 +301,7 @@ class MainViewModel: ViewModel() {
     var selectedTask: Task? by mutableStateOf(null)
 
     fun sizeOfSelectedTasks(): Int {
-        return  _selectedTasks.value?.size ?: 0
+        return _selectedTasks.value?.size ?: 0
     }
 
     fun isTaskSelected(taskId: UUID): Boolean {
@@ -249,78 +377,58 @@ class MainViewModel: ViewModel() {
     private val _viewNumber = MutableLiveData(0)
     val viewNumber: LiveData<Int> = _viewNumber
 
-    // For device default color theme
-    // So only viable themes are "default", "dark", "light"
-    private val _theme = MutableLiveData("default")
-    val theme : LiveData<String> = _theme
-
     fun updateViewNumber(newNumber: Int) {
         _viewNumber.value = newNumber
     }
 
+    // For device default color theme
+    // So only viable themes are "default", "dark", "light"
+    private val _theme = MutableLiveData("default")
+    val theme: LiveData<String> = _theme
+
+    private val _themeBool = MutableLiveData<Boolean>()
+    val themeBool: LiveData<Boolean> = _themeBool
+
+
     fun updateTheme(themeName: String) {
         val themes = arrayOf("default", "dark", "light")
-
         if (themes.contains(themeName)) {
             _theme.value = themeName
+            updateThemeBool()
         }
     }
 
-    //call this before closing app
-    fun saveTasks(filepath: String) {
-
-        val path = context.getFilesDir()
-
-        //using Gson because the task UUID has issues with implementing serializable
-        val gson = Gson()
-        //declare a file object with the filepath
-        val file = File(filepath)
-        //load any pre existing json tasks at the filepath to _tasks
-        loadTasks(filepath)
-        //instance of updated list in viewmodel list with additional check for unique ids
-        val updatedList = _tasks.value.orEmpty().distinctBy { it.id }
-        //since loadtasks() has been called and updated the view model already, we can clear the current saved data
-        file.writeText("")
-
-        // Convert the updated task list to JSON
-        val updatedJson = gson.toJson(updatedList)
-
-        // Write the updated JSON back to the file
-        file.writeText(updatedJson)
-
+    fun updateThemeBool() {
+        _themeBool.value = when (_theme.value) {
+            "dark" -> true
+            "light" -> false
+            else -> isSystemInDarkMode()
+        }
     }
 
-    //call this on app start up
-    fun loadTasks(filepath: String) {
-        val updatedList = _tasks.value.orEmpty().toMutableList()
-        val gson = Gson()
-        val existingTasks: MutableList<Task> = mutableListOf()
-        val file = File(filepath)
-        //check if path exists
-        if (file.exists()) {
-            //read in from the file
-            val existingJson = file.readText()
-            //check to see if file is not empty
-            if (existingJson.isNotEmpty()) {
-                //create a jsonArray of the json objects in the file
-                val jsonArray = JsonParser.parseString(existingJson).asJsonArray
-                //loop trough each item in json array to create a task, and add it to existing task list
-                for (i in jsonArray) {
-                    val task = gson.fromJson(i, Task::class.java)
-                    //check for duplicate ids
-                    if (updatedList.none { it.id == task.id }) {
-                        //add tasks to existing task
-                        existingTasks.add(task)
-                    }
-                }
-                //add all existing tasks to the updated list
-                updatedList.addAll(existingTasks)
-            } else {
-                println("No tasks to load")
-            }
+    private fun isSystemInDarkMode(): Boolean {
+        val currentNightMode = getApplication<Application>().resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
 
-            //load updated list to viewmodel list
-            _tasks.value = updatedList
+
+    // To return black or white for view themes
+    fun getColor(): Color {
+        return if (_themeBool.value == true) {
+            Color.White
+        } else {
+            Color.Black
         }
+    }
+}
+
+class MainViewModelFactory(private val application: Application) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST") return MainViewModel(application) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

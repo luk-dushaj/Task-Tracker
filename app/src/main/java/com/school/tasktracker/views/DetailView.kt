@@ -1,5 +1,7 @@
 package com.school.tasktracker.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +34,9 @@ import androidx.navigation.compose.rememberNavController
 import com.school.tasktracker.data.Routes
 import com.school.tasktracker.ui.theme.lightRed
 import com.school.tasktracker.ui.theme.lightBlue
+import com.school.tasktracker.data.DateTime
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DetailView(
     modifier: Modifier = Modifier,
@@ -41,6 +45,7 @@ fun DetailView(
 ) {
     val task = viewModel.selectedTask
     if (task != null) {
+        val daysLeft = DateTime().getDays(task.date)
         Column(
             modifier = modifier
                 .padding(15.dp)
@@ -80,7 +85,7 @@ fun DetailView(
             DateTextComposable(
                 text = buildAnnotatedString {
                     append("There is ")
-                    dataText("${task.days}")
+                    dataText("$daysLeft")
                     append(" days remaining")
                 }
             )
@@ -163,7 +168,9 @@ private fun PreviewDetailView() {
         isPriority = false,
     )
 
-    val viewModel = MainViewModel()
+    val viewModel = MainViewModel(
+        application = TODO()
+    )
 
     viewModel.addTask(task)
 

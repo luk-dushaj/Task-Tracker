@@ -42,18 +42,12 @@ class DateTime {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    public fun getDays(dueDate:String):Int{
-
-        val currentDate = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
+    fun getDays(dueDate: String): Int {
         val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        val current = LocalDate.now() // Current date
+        val due = LocalDate.parse(dueDate, formatter) // Parse due date
 
-        val current = LocalDate.parse(currentDate.toString(),formatter)
-        val due = LocalDate.parse(dueDate,formatter)
-
-        val daysRemaining = ChronoUnit.DAYS.between(current,due)
-
-        return daysRemaining.toInt()
+        return ChronoUnit.DAYS.between(current, due).toInt()
     }
-
 
 }

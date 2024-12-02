@@ -1,11 +1,16 @@
 package com.school.tasktracker
 
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,56 +36,102 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
-import com.school.tasktracker.ui.theme.TaskTrackerTheme
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.NavController
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
+import androidx.navigation.compose.rememberNavController
 import com.school.tasktracker.data.MainViewModel
+import com.school.tasktracker.data.MainViewModelFactory
 import com.school.tasktracker.data.Routes
-import com.school.tasktracker.data.Task
+import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import com.school.tasktracker.views.AddTaskView
 import com.school.tasktracker.views.DetailView
-import com.school.tasktracker.views.EditView
 import com.school.tasktracker.views.HomeView
 import com.school.tasktracker.views.InfoView
-import com.school.tasktracker.views.SettingsView
-import com.school.tasktracker.views.HomeView
 import com.school.tasktracker.views.SelectionView
+import com.school.tasktracker.views.SettingsView
 
 // Project so far has only been tested on emulator Medium Phone API 35
 // Should test on different emulators soon
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MainViewModel
+    private lateinit var importTasksLauncher: ActivityResultLauncher<String>
+    private lateinit var exportTasksLauncher: ActivityResultLauncher<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
+        // Register observers for file imports and exports
+        importTasksLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { viewModel.importTasks(it) }
+        }
+
+        exportTasksLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri: Uri? ->
+            uri?.let { viewModel.saveTasksToUri(it) }
+        }
+
+        viewModel.triggerImport.observe(this) {
+            if (it == true) {
+                importTasksLauncher.launch("application/json")
+                viewModel.requestImport() // Reset the trigger
+            }
+        }
+
+        viewModel.triggerExport.observe(this) {
+            if (it == true) {
+                exportTasksLauncher.launch("tasks.json")
+                viewModel.requestExport()
+            }
+        }
+
         enableEdgeToEdge()
         setContent {
-            TaskTrackerTheme {
+            val isDarkMode by viewModel.themeBool.observeAsState(false)
+
+            TaskTrackerTheme(darkTheme = isDarkMode) {
                 MainView()
             }
         }
     }
-}
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Update theme state dynamically in "default" mode
+        if (viewModel.theme.value == "default") {
+            viewModel.updateThemeBool()
+        }
+    }
+}
+@SuppressLint("NewApi")
 @Composable
 fun MainView(modifier: Modifier = Modifier) {
-    val viewModel = MainViewModel()
+    val viewModel: MainViewModel = viewModel(
+        factory = MainViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.initializeTasksFile() // Ensure the file exists
+        viewModel.loadTasksFromFile()   // Load tasks if available
+    }
     val navController = rememberNavController()
     Scaffold(
         topBar = {
@@ -105,7 +156,7 @@ fun MainView(modifier: Modifier = Modifier) {
                     )
                 }
                 composable(Routes.settings) { SettingsView(viewModel = viewModel) }
-                composable(Routes.info) { InfoView() }
+                composable(Routes.info) { InfoView(viewModel = viewModel) }
                 composable(Routes.add) {
                     AddTaskView(
                         viewModel = viewModel,

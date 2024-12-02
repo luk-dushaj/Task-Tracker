@@ -1,6 +1,7 @@
 package com.school.tasktracker.views
 
-import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,32 +12,22 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.school.tasktracker.components.PriorityComposable
 import com.school.tasktracker.components.TaskContent
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
-import com.school.tasktracker.data.Task
-import com.school.tasktracker.ui.theme.TaskTrackerTheme
-import kotlin.math.tanh
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SelectionView(
     modifier: Modifier = Modifier,
@@ -104,6 +95,7 @@ fun ButtonRow(modifier: Modifier = Modifier, viewModel: MainViewModel) {
                 onClick = {
                     if (viewModel.sizeOfSelectedTasks() > 0) {
                         viewModel.deleteTasks()
+                        viewModel.saveTasksToFile()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
@@ -113,7 +105,7 @@ fun ButtonRow(modifier: Modifier = Modifier, viewModel: MainViewModel) {
 
             // Select All Button
             Button(
-                modifier = modifier.alpha(if (viewModel.isSelectedTasksEmpty()) 1.0f else 0.5f),
+                modifier = modifier.alpha(if (selectionMode == true) 1.0f else 0.5f),
                 onClick = {
                     if (viewModel.isSelectedTasksFull()) {
                         viewModel.deSelectAllTasks()
@@ -125,24 +117,6 @@ fun ButtonRow(modifier: Modifier = Modifier, viewModel: MainViewModel) {
             ) {
                 Text(if (viewModel.isSelectedTasksFull()) "Deselect All" else "Select All")
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PreviewSelectionView() {
-    TaskTrackerTheme {
-        Surface {
-            val viewModel = MainViewModel()
-            viewModel.addTask(
-                Task(
-                    title = "Go shopping",
-                    description = "Get eggs, bread and fruits",
-                    isPriority = true
-                )
-            )
-            SelectionView(viewModel = viewModel, navController = rememberNavController())
         }
     }
 }

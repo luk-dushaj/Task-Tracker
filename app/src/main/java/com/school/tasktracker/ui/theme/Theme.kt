@@ -9,13 +9,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
@@ -33,6 +28,17 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFFBB86FC),
+    onPrimary = Color.Black,
+    secondary = Color(0xFF03DAC5),
+    onSecondary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+)
+
 @Composable
 fun TaskTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -45,7 +51,6 @@ fun TaskTrackerTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
