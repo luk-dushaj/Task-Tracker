@@ -5,7 +5,9 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,6 +24,9 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStreamReader
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 // ViewModel is going to be used for sharing data across views in a unified way
@@ -420,6 +425,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             Color.Black
         }
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getDays(dueDate: String): Int {
+        val formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        val current = LocalDate.now() // Current date
+        val due = LocalDate.parse(dueDate, formatter) // Parse due date
+
+        return ChronoUnit.DAYS.between(current, due).toInt()
     }
 }
 

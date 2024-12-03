@@ -17,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -30,16 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.school.tasktracker.components.HalfStarIcon
 import com.school.tasktracker.components.TextRow
 import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
 import com.school.tasktracker.data.Task
-import com.school.tasktracker.ui.theme.TaskTrackerTheme
 import com.school.tasktracker.ui.theme.evergreen
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -304,18 +300,5 @@ fun errorChecking(
     } catch (e: Exception) {
         errorMessage.value = "Invalid date or time format."
         true
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun AddTaskPreview() {
-    TaskTrackerTheme {
-        Surface {
-            AddTaskView(viewModel = MainViewModel(
-                application = TODO()
-            ), navController = rememberNavController())
-        }
     }
 }

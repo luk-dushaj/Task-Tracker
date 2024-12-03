@@ -11,17 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import com.school.tasktracker.components.TextRow
-import com.school.tasktracker.data.MainViewModel
-import com.school.tasktracker.data.Task
-import com.school.tasktracker.ui.theme.TaskTrackerTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -30,11 +24,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.school.tasktracker.components.TextRow
+import com.school.tasktracker.data.MainViewModel
 import com.school.tasktracker.data.Routes
-import com.school.tasktracker.ui.theme.lightRed
 import com.school.tasktracker.ui.theme.lightBlue
-import com.school.tasktracker.data.DateTime
+import com.school.tasktracker.ui.theme.lightRed
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -45,7 +39,7 @@ fun DetailView(
 ) {
     val task = viewModel.selectedTask
     if (task != null) {
-        val daysLeft = DateTime().getDays(task.date)
+        val daysLeft = viewModel.getDays(task.date)
         Column(
             modifier = modifier
                 .padding(15.dp)
@@ -157,29 +151,4 @@ fun ExitButton(modifier: Modifier = Modifier, navController: NavController) {
             color = Color.White
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewDetailView() {
-    val task = Task(
-        title = "Do laundry",
-        description = "Go to laundromat, set timer for 30 minutes, come home.",
-        isPriority = false,
-    )
-
-    val viewModel = MainViewModel(
-        application = TODO()
-    )
-
-    viewModel.addTask(task)
-
-    viewModel.selectedTask = task
-
-    TaskTrackerTheme {
-        Surface {
-            DetailView(viewModel = viewModel, navController = rememberNavController())
-        }
-    }
-
 }

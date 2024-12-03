@@ -94,15 +94,3 @@ fun HomeView(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeView() {
-    TaskTrackerTheme {
-        Surface {
-            HomeView(viewModel = viewModel(), navController = rememberNavController())
-//            PriorityComposable(viewModel = viewModel(), isPriority = false)
-//            ColoredLine(color = Color.Blue)
-        }
-    }
-}
